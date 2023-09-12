@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+
+
+<link rel="stylesheet" href="/a00_com/bootstrap.min.css" >
+<link rel="stylesheet" href="/a00_com/jquery-ui.css" >
+<script src="/a00_com/jquery.min.js"></script>
+<script src="/a00_com/popper.min.js"></script>
+<script src="/a00_com/bootstrap.min.js"></script>
+<script src="/a00_com/jquery-ui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<template id="schTmp">
+	
+  	<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+	    <input class="form-control mr-sm-2" @keyup.13="search" placeholder="사원명" 
+	    	v-model="sch.ename"/>
+	    <input class="form-control mr-sm-2" @keyup.13="search"  placeholder="직책" 
+	    	 v-model="sch.job"  />
+	    <button class="btn btn-primary" type="button" @click="search">조 회</button>
+ 	</nav>
+	
+</template>
+<template id="listTmp"> 
+  	<table  class="table table-hover table-striped">
+		<col width="20%">
+		<col width="20%">
+		<col width="20%">
+		<col width="20%">
+		<col width="20%">
+		<thead class="text-center thead-light">
+			<tr><th>사원번호</th><th>사원명</th><th>직책명</th>
+			<th>급여</th><th>입사일</th></tr>
+		</thead>
+		<tr class="text-center" v-for="emp in list" >
+			<td v-text="emp.empno"></td>
+			<td v-text="emp.ename"></td>
+			<td  v-text="emp.job"></td>
+			<td  v-text="Number(emp.sal).toLocaleString()"></td>
+			<td v-text="new Date(emp.hiredate).toLocaleDateString()"></td>
+		</tr>		   
+	</table>
+
+</template>
+
+<script type="text/javascript">
+	var eventBus = new Vue();
+	   Vue.component("sch-comp",{
+	 		template:"#schTmp",
+	 		data:function(){
+	 			return {sch:{ename:"",job:""}};
+	 		},
+			methods:{
+	 			search:function(){
+	 				console.log("# 검색메서드 호출 #")
+	 				console.log(this.sch)
+	 				eventBus.$emit("search",this.sch);
+	 			}
+	 		}
+	 	})
+
+	  	Vue.component("list-comp",{
+	 		template:"#listTmp",
+	 		data:function(){
+	 			return {favor:"좋아요"};
+	 		},
+	 		props:{
+				list:{type:Array}	 
+			},
+	 		created:function(){
+				console.log("초기 사원정보 리스트")	 
+				console.log(this.favor)	 
+				console.log(this.empList)	 
+			},
+			updated:function(){
+				console.log("수정 사원정보 리스트")	 
+				console.log(this.empList)				
+			}
+	 	})	
+	$(document).ready(function(){
+		vm = new Vue({
+			el:".container",
+			data:{sch:{}, empList:[]},
+			methods:{
+				search:function(){
+					console.log("#검색#");
+					console.log();
+					vm = this;
+					console.log(vm.sch)
+		            axios({
+		                method:"post",
+		                url: '/empListData', // empListData
+		                params:vm.sch
+		            }).then((res)=>{
+						console.log("#검색된 데이터#")
+		            	vm.empList = res.data;		            	
+		            	
+		                console.log(vm.empList);
+		            }).catch(error=>{
+		                console.log(error);
+		                throw new Error(error);
+		            });					
+				}
+			},
+			created:function(){
+				var vm = this
+				eventBus.$on("search",(sch)=>{
+					console.log("#초기#")
+					console.log("이벤트 버스로 넘거온 데이터")
+					console.log(sch)
+					vm.sch = sch
+					vm.search();
+				}); 
+				this.search()
+			}
+		})
+	});
+</script>
+</head>
+
+<body>
+<div class="jumbotron text-center"  style="padding: 35px 5px 10px 5px;">
+  <h2>사원정보</h2>
+</div>
+<div class="container">
+	<sch-comp ></sch-comp>
+	<list-comp :list="empList" ></list-comp> 
+</div>
+</body>
+</html>

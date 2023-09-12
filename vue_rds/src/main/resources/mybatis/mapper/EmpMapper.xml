@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >	
+<mapper namespace="com.web.emp.dao.EmpDao">
+	<!-- 
+	List<Emp> getEmpList(Emp sch
+	-->
+	<select id="getEmpList" resultType="emp" 
+		parameterType="emp">
+		select * 
+		from EMP
+		where ENAME like #{ename}
+		and JOB like #{job} 
+	</select>
+</mapper>
+
+
+
+	

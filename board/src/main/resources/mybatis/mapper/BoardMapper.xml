@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >	
+<mapper namespace="com.web.board.dao.BoardDao">
+	<select id="getTot" parameterType="boardsch">
+		select count(*)
+		from board
+		where 1=1
+		and subject like '%'||#{subject}||'%'
+		and writer like '%'||#{writer}||'%'
+	</select>
+	<select id="boardList" resultType="board" 
+		parameterType="boardsch">
+		select *
+		from (
+		select rownum cnt, level, b.*
+		from board b
+		where 1=1
+		and subject like '%'||#{subject}||'%'
+		and writer like '%'||#{writer}||'%'
+		start with refno = 0
+		connect by prior no = refno
+		order siblings by no DESC )
+		where cnt between #{start} and #{end}
+				
+	</select>
+	<!-- 
+	public Member login(Member mem);
+	 -->
+	<select id="login" resultType="member" parameterType="member">
+		SELECT *
+		FROM MEMBER01
+		WHERE id = #{id}
+		AND pass = #{pass}		
+	</select>
+	<select id="getNo" resultType="int">
+		SELECT board_seq.nextval FROM dual	
+	</select>
+	<insert id="insertBoard" parameterType="board">
+		INSERT INTO board VALUES(#{no},#{refno},
+		#{subject},#{content},
+		#{writer},0, sysdate, sysdate)		
+	</insert>
+	<!-- Board getBoard(int no); -->
+	<select id="getBoard" parameterType="int" 
+						  resultType="board">
+		select * from board where no  = #{no}
+	</select>
+	<update id="readCntUp" parameterType="int">
+		update board
+			set readcnt = readcnt + 1
+		 where no = #{no}	
+	</update>
+	<!-- 
+		update board
+			set subject=#{subject},
+			    content=#{content},
+			    uptdte = sysdate
+			where no = #{no}
+		dao/mapper
+			public int updateBoard(Board upt);
+	 -->
+	 <update id="updateBoard" parameterType="board">
+		update board
+			set subject=#{subject},
+			    content=#{content},
+			    uptdte = sysdate
+			where no = #{no}	 
+	 </update>
+	 <!-- 
+	 		public int deleteBoard(int no);
+		delete from board where no = #{no}
+		
+		
+	  -->
+	 <delete id="deleteBoard" parameterType="int">
+	 	delete from board where no = #{no}
+	 </delete>	 
+	 
+	 
+		<!-- no, fname, info -->
+	 <insert id="insertBoardFile" 
+	 	parameterType="boardfile">
+		INSERT INTO BOARDFILE values(#{no},
+			#{fname},'',#{info}, sysdate,sysdate,'')	 
+	 </insert> 
+	 <delete id="deleteBoardFile" 
+	 	parameterType="boardfile">
+		delete from BOARDFILE
+		where no = #{no}
+		and fname = #{fname}	 
+	 </delete> 	 
+	 <!-- 
+	 
+	 public int deleteBoardFile(BoardFile del);
+	 	select fname from boardfile
+		where no = #{no}
+		dao/mapper 작성
+		
+		public String[] getFnames(int no);
+	  -->
+	  <select id="getFnames" resultType="string" 
+	  		parameterType="int">
+	 	select fname from boardfile
+		where no = #{no}	  
+	  </select>
+	 
+</mapper>
+
+
+
+	
